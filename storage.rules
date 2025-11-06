@@ -1,0 +1,78 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to get user email from Firestore
+    function getUserEmail() {
+      return firestore.exists(/databases/(default)/documents/users/$(request.auth.uid))
+        ? firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.email
+        : null;
+    }
+    
+    // Helper function to get user role from userRoles collection (by email)
+    function getUserRole() {
+      // Special case: super admin email always has admin role
+      return getUserEmail() == 'michaelnhyira77@gmail.com' 
+        ? 'admin' 
+        : (getUserEmail() != null && firestore.exists(/databases/(default)/documents/userRoles/$(getUserEmail()))
+          && firestore.get(/databases/(default)/documents/userRoles/$(getUserEmail())).data.isActive == true 
+          ? firestore.get(/databases/(default)/documents/userRoles/$(getUserEmail())).data.role 
+          : null);
+    }
+    
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return isAuthenticated() && getUserRole() == 'admin';
+    }
+    
+    // Helper function to check if user is teacher
+    function isTeacher() {
+      return isAuthenticated() && getUserRole() == 'teacher';
+    }
+    
+    // Helper function to check if user is accountant
+    function isAccountant() {
+      return isAuthenticated() && getUserRole() == 'accountant';
+    }
+    
+    // Profile photos - authenticated users can read, admins/teachers can upload
+    match /profile-photos/{userType}/{userId}/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (
+        isAdmin() || 
+        (userType == 'students' && (isAdmin() || isTeacher())) ||
+        (userType == 'teachers' && isAdmin()) ||
+        (userType == 'users' && (isAdmin() || request.auth.uid == userId))
+      );
+    }
+    
+    // Reports - authenticated users can read, teachers/admins can write
+    // Path format: reports/{academicYear}_{term}/{className}/{fileName}
+    match /reports/{academicYearTerm}/{className}/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (isAdmin() || isTeacher());
+    }
+    
+    // Student documents - authenticated users can read, admins/teachers can write
+    match /students/{studentId}/{allPaths=**} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (isAdmin() || isTeacher());
+    }
+    
+    // Teacher documents - authenticated users can read, admins can write
+    match /teachers/{teacherId}/{allPaths=**} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    
+    // Default deny rule for any other paths
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

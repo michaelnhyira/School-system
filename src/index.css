@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+:root {
+  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: #f8fafc;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Custom colors for login component */
+.bg-background-light {
+  background-color: #f6f7f8;
+}
+
+.bg-background-dark {
+  background-color: #101922;
+}
+
+.text-primary {
+  color: #1173d4;
+}
+
+.bg-primary {
+  background-color: #1173d4;
+}
+
+.border-primary {
+  border-color: #1173d4;
+}
+
+.ring-primary {
+  --tw-ring-color: #1173d4;
+}
+
+.focus\:border-primary:focus {
+  border-color: #1173d4;
+}
+
+.focus\:ring-primary:focus {
+  --tw-ring-color: #1173d4;
+}
+
+.hover\:bg-primary\/90:hover {
+  background-color: rgba(17, 115, 212, 0.9);
+}
+
+.hover\:text-primary\/90:hover {
+  color: rgba(17, 115, 212, 0.9);
+}
