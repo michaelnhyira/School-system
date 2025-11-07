@@ -381,8 +381,6 @@ export const studentUtils = {
 
   async completeJHS3Batch(year: string, studentIds: string[]) {
     try {
-      const batchId = `${year}_batch`;
-      
       // Get all student data before moving
       const studentDataPromises = studentIds.map(async (studentId) => {
         const studentRef = doc(db, 'students', studentId);
@@ -2470,7 +2468,7 @@ export const reportUtils = {
           removeContainer: false, // Changed to false to manually remove
           imageTimeout: 15000, // 15 second timeout for images
           foreignObjectRendering: false,
-          onclone: (clonedDoc) => {
+          onclone: () => {
             // Ensure cloned document is ready
             console.log('html2canvas clone created');
           }
@@ -2755,7 +2753,6 @@ export const promotionUtils = {
 
       // Update student records
       const updatePromises = studentIds.map(async (studentId: string) => {
-        const student = await studentUtils.getStudent(studentId)
         await studentUtils.updateStudent(studentId, {
           previousClass: fromClass,
           promotedFrom: fromClass,
@@ -2788,7 +2785,7 @@ export const promotionUtils = {
   },
 
   // Mark students to repeat (stay in same class)
-  async markStudentsToRepeat(studentIds: string[], className: string) {
+  async markStudentsToRepeat(studentIds: string[]) {
     try {
       const updatePromises = studentIds.map((studentId: string) =>
         studentUtils.updateStudent(studentId, {

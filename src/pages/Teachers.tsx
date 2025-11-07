@@ -49,30 +49,30 @@ interface Teacher {
   phone: string
   subjects: string[] // Changed from subject to subjects array
   assignedClass?: string // Optional assigned class
-  experience: number | string
+  experience?: string
   hireDate: string
   status: 'active' | 'inactive'
   // Additional fields for detailed view
-  fullName: string
-  dob: string
-  gender: string
-  maritalStatus: string
-  nationality: string
-  religion: string
-  address: string
-  contactNumber: string
-  qualification: string
+  fullName?: string
+  dob?: string
+  gender?: string
+  maritalStatus?: string
+  nationality?: string
+  religion?: string
+  address?: string
+  contactNumber?: string
+  qualification?: string
   licenseNumber?: string
-  specialization: string
+  specialization?: string
   previousExperience?: string
   staffId?: string
-  appointmentDate: string
-  guardianName: string
-  relationship: string
-  occupation: string
-  guardianContact: string
-  guardianAddress: string
-  photoUrl?: string
+  appointmentDate?: string
+  guardianName?: string
+  relationship?: string
+  occupation?: string
+  guardianContact?: string
+  guardianAddress?: string
+  photoUrl?: string | null
 }
 
 const Teachers = () => {
@@ -83,7 +83,6 @@ const Teachers = () => {
   const [showDetailModal, setShowDetailModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [editSelectedFile, setEditSelectedFile] = useState<File | null>(null)
   const [editImagePreview, setEditImagePreview] = useState<string | null>(null)
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([])
@@ -150,6 +149,46 @@ const Teachers = () => {
   const [loading, setLoading] = useState(true)
   const [subjects, setSubjects] = useState<any[]>([])
 
+  const mapFirestoreTeacher = (teacher: any): Teacher => ({
+    id: teacher.id,
+    name: teacher.fullName || teacher.name || '',
+    email: teacher.email || '',
+    phone: teacher.contactNumber || teacher.phone || '',
+    subjects: teacher.subjects || (teacher.subject ? [teacher.subject] : []),
+    experience: teacher.experience !== undefined && teacher.experience !== null
+      ? String(teacher.experience)
+      : teacher.previousExperience !== undefined && teacher.previousExperience !== null
+        ? String(teacher.previousExperience)
+        : '0',
+    hireDate: teacher.appointmentDate || teacher.hireDate || new Date().toISOString().split('T')[0],
+    status: teacher.status || 'active',
+    fullName: teacher.fullName || teacher.name || '',
+    dob: teacher.dob || '',
+    gender: teacher.gender || '',
+    maritalStatus: teacher.maritalStatus || '',
+    nationality: teacher.nationality || 'Ghanaian',
+    religion: teacher.religion || '',
+    address: teacher.address || '',
+    contactNumber: teacher.contactNumber || teacher.phone || '',
+    qualification: teacher.qualification || '',
+    licenseNumber: teacher.licenseNumber || '',
+    specialization: teacher.specialization || '',
+    previousExperience: teacher.previousExperience !== undefined && teacher.previousExperience !== null
+      ? String(teacher.previousExperience)
+      : teacher.experience !== undefined && teacher.experience !== null
+        ? String(teacher.experience)
+        : '',
+    staffId: teacher.staffId || '',
+    appointmentDate: teacher.appointmentDate || teacher.hireDate || '',
+    assignedClass: teacher.assignedClass || '',
+    guardianName: teacher.guardianName || teacher.kinName || '',
+    relationship: teacher.relationship || '',
+    occupation: teacher.occupation || '',
+    guardianContact: teacher.guardianContact || teacher.kinContact || '',
+    guardianAddress: teacher.guardianAddress || teacher.kinAddress || '',
+    photoUrl: teacher.photoUrl || null
+  })
+
   // Load classes when component mounts
   useEffect(() => {
     const loadClasses = async () => {
@@ -187,38 +226,7 @@ const Teachers = () => {
         const firestoreTeachers = await teacherUtils.getTeachers()
         
         // Transform Firestore data to match our Teacher interface
-        const transformedTeachers = firestoreTeachers.map((teacher: any) => ({
-          id: teacher.id,
-          name: teacher.fullName || teacher.name,
-          email: teacher.email || '',
-          phone: teacher.contactNumber || teacher.phone,
-          subjects: teacher.subjects || (teacher.subject ? [teacher.subject] : []),
-          experience: teacher.experience?.toString() || '0',
-          hireDate: teacher.appointmentDate || teacher.hireDate || new Date().toISOString().split('T')[0],
-          status: teacher.status || 'active',
-          // Detailed information
-          fullName: teacher.fullName || teacher.name || '',
-          dob: teacher.dob || '',
-          gender: teacher.gender || '',
-          maritalStatus: teacher.maritalStatus || '',
-          nationality: teacher.nationality || 'Ghanaian',
-          religion: teacher.religion || '',
-          address: teacher.address || '',
-          contactNumber: teacher.contactNumber || teacher.phone || '',
-          qualification: teacher.qualification || '',
-          licenseNumber: teacher.licenseNumber || '',
-          specialization: teacher.specialization || '',
-          staffId: teacher.staffId || '',
-          previousExperience: teacher.previousExperience || teacher.experience || '',
-          appointmentDate: teacher.appointmentDate || '',
-          assignedClass: teacher.assignedClass || '',
-          guardianName: teacher.guardianName || teacher.kinName || '',
-          relationship: teacher.relationship || '',
-          occupation: teacher.occupation || '',
-          guardianContact: teacher.guardianContact || teacher.kinContact || '',
-          guardianAddress: teacher.guardianAddress || teacher.kinAddress || '',
-          photoUrl: teacher.photoUrl || null
-        }))
+        const transformedTeachers = firestoreTeachers.map(mapFirestoreTeacher)
         
         setTeachers(transformedTeachers)
         console.log('Teachers loaded from Firestore:', transformedTeachers.length)
@@ -253,37 +261,7 @@ const Teachers = () => {
       
       // Refresh the teachers list
       const firestoreTeachers = await teacherUtils.getTeachers();
-      const transformedTeachers = firestoreTeachers.map((teacher: any) => ({
-        id: teacher.id,
-        name: teacher.fullName || teacher.name,
-        email: teacher.email || '',
-        phone: teacher.contactNumber || teacher.phone,
-        subjects: teacher.subjects || (teacher.subject ? [teacher.subject] : []),
-        experience: teacher.experience || 0,
-        hireDate: teacher.appointmentDate || teacher.hireDate || new Date().toISOString().split('T')[0],
-        status: teacher.status || 'active',
-        // Detailed information
-        fullName: teacher.fullName || teacher.name,
-        dob: teacher.dob || '',
-        gender: teacher.gender || '',
-        maritalStatus: teacher.maritalStatus || '',
-        nationality: teacher.nationality || '',
-        religion: teacher.religion || '',
-        address: teacher.address || '',
-        contactNumber: teacher.contactNumber || teacher.phone,
-        qualification: teacher.qualification || '',
-        licenseNumber: teacher.licenseNumber || '',
-        specialization: teacher.specialization || '',
-        staffId: teacher.staffId || '',
-        previousExperience: teacher.previousExperience || teacher.experience || '',
-        appointmentDate: teacher.appointmentDate || '',
-        assignedClass: teacher.assignedClass || '',
-        kinName: teacher.kinName || '',
-        relationship: teacher.relationship || '',
-        kinContact: teacher.kinContact || '',
-        kinAddress: teacher.kinAddress || '',
-        photoUrl: teacher.photoUrl || null
-      }));
+      const transformedTeachers = firestoreTeachers.map(mapFirestoreTeacher);
       
       setTeachers(transformedTeachers);
       
@@ -386,7 +364,7 @@ const Teachers = () => {
         subjects: selectedSubjects,
         photoUrl: photoUrl,
         assignedClass: formData.assignedClass,
-        experience: 0,
+        experience: '0',
         hireDate: new Date().toISOString().split('T')[0],
         status: 'active'
       }
@@ -417,7 +395,7 @@ const Teachers = () => {
         phone: formData.contactNumber,
         subjects: selectedSubjects, // Changed to subjects array
         assignedClass: formData.assignedClass, // Added assigned class
-        experience: 0,
+        experience: '0',
         hireDate: new Date().toISOString().split('T')[0],
         status: 'active',
         photoUrl: photoUrl
@@ -478,8 +456,8 @@ const Teachers = () => {
         }
 
         // Upload new image
-        const filePath = `profile-photos/teachers/${selectedTeacher.id}/profile_${Date.now()}`
         const sanitizedFileName = editSelectedFile.name.replace(/[^a-zA-Z0-9.-]/g, '_')
+        const filePath = `profile-photos/teachers/${selectedTeacher.id}/profile_${Date.now()}_${sanitizedFileName}`
         photoUrl = await storageUtils.uploadFile(editSelectedFile, filePath)
       }
 
@@ -1217,7 +1195,7 @@ const Teachers = () => {
                                     setSelectedFile(file);
                                     const reader = new FileReader();
                                     reader.onload = (e) => {
-                                      setImagePreview(e.target?.result as string);
+                                      console.log('Preview generated for upload', e.target?.result ? 'success' : 'failed');
                                     };
                                     reader.readAsDataURL(file);
                                   }

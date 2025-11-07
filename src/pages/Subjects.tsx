@@ -73,7 +73,11 @@ const Subjects = () => {
             const teachers = await teacherUtils.getTeachers()
             const me = teachers.find((t: any) => t.email === currentUser.email)
             if (me) {
-              setTeacherSubjectNames(Array.isArray(me.subjects) ? me.subjects : (me.subject ? [me.subject] : []))
+              const teacherRecord = me as Record<string, any>
+              const subjectList = Array.isArray(teacherRecord.subjects)
+                ? teacherRecord.subjects
+                : (teacherRecord.subject ? [teacherRecord.subject] : [])
+              setTeacherSubjectNames(subjectList)
             } else {
               setTeacherSubjectNames([])
             }
@@ -118,7 +122,7 @@ const Subjects = () => {
         name: formData.name
       }
 
-      const subjectId = await subjectUtils.createSubject(newSubject)
+      await subjectUtils.createSubject(newSubject)
       
       // Refresh subjects list
       const firestoreSubjects = await subjectUtils.getSubjects()

@@ -21,6 +21,7 @@ export interface Student {
   prevSchool?: string
   lastClass?: string
   specialNeeds?: string
+  nationality?: string
   guardianName?: string
   relationship?: string
   occupation?: string

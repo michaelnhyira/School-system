@@ -97,7 +97,7 @@ export const testNewPaymentStructure = async () => {
     console.log('🔄 Test 4: Get Individual Payments');
     const payments = await feesUtils.getStudentPaymentsForPeriod(studentId, academicYear, term);
     console.log(`📋 Found ${payments.length} individual payments:`);
-    payments.forEach((payment, index) => {
+    payments.forEach((payment: any, index: number) => {
       console.log(`  ${index + 1}. ₵${payment.amount} via ${payment.paymentMethod} on ${payment.createdAt}`);
     });
     console.log('');
@@ -106,7 +106,7 @@ export const testNewPaymentStructure = async () => {
     console.log('🔄 Test 5: Get All Payments for Period');
     const allPayments = await feesUtils.getFeePaymentsForPeriod(academicYear, term);
     console.log(`📋 Found ${allPayments.length} total payments in period:`);
-    allPayments.forEach((payment, index) => {
+    allPayments.forEach((payment: any, index: number) => {
       console.log(`  ${index + 1}. ${payment.studentName}: ₵${payment.amount} via ${payment.paymentMethod}`);
     });
     console.log('');

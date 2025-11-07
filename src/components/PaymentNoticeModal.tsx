@@ -3,7 +3,7 @@ import { AlertTriangle, X, Clock } from 'lucide-react';
 import { usePaymentLock } from '../contexts/PaymentLockContext';
 
 const PaymentNoticeModal: React.FC = () => {
-  const { lockData, isNoticeActive, isLockActive, shouldShowModal, canDismiss, getRemainingDays, dismissNotice, hasUserDismissed, loading } = usePaymentLock();
+  const { isNoticeActive, isLockActive, shouldShowModal, canDismiss, getRemainingDays, dismissNotice, hasUserDismissed, loading } = usePaymentLock();
   const [isDismissing, setIsDismissing] = useState(false);
   const [remainingDays, setRemainingDays] = useState(0);
   const [showModal, setShowModal] = useState(false);

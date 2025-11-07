@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Search, Users, Phone, MapPin, Calendar, User, BookOpen } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
-import { useGradesAcademicPeriod } from '../contexts/GradesAcademicPeriodContext'
 import { studentUtils, teacherUtils } from '../utils/firebaseUtils'
 import { formatDate } from '../utils/dateUtils'
 import StudentHistoryModal from '../components/StudentHistoryModal'
@@ -53,8 +52,7 @@ interface Teacher {
 }
 
 const MyStudents = () => {
-  const { currentUser, userRoleData } = useAuth()
-  const { currentPeriod } = useGradesAcademicPeriod()
+  const { currentUser } = useAuth()
   const [searchTerm, setSearchTerm] = useState('')
   const [students, setStudents] = useState<Student[]>([])
   const [teacher, setTeacher] = useState<Teacher | null>(null)

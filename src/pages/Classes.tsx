@@ -48,6 +48,7 @@ interface ClassFormData {
 interface Student {
   id: string
   name: string
+  fullName?: string
   currentClass: string
   email?: string
   phone?: string
@@ -126,9 +127,6 @@ const Classes = () => {
     subjects: []
   })
 
-  // Subject options to pick for a class
-  const [subjectOptions, setSubjectOptions] = useState<string[]>([])
-  
   // Available subdivisions for the selected grade
   const [availableSubdivisions, setAvailableSubdivisions] = useState<string[]>(['A', 'B', 'C', 'D'])
   const [hasBaseClass, setHasBaseClass] = useState(false) // Track if a base class (no subdivision) exists
@@ -302,23 +300,6 @@ const Classes = () => {
     fetchClasses()
   }, [teachers])
 
-  // Fetch all subject names for selection in Add Class modal
-  useEffect(() => {
-    const loadSubjects = async () => {
-      try {
-        const list = await subjectUtils.getSubjects()
-        const names = list.map((s: any) => s.name).filter(Boolean)
-        setSubjectOptions(names)
-      } catch (e) {
-        console.error('Error loading subject options:', e)
-        setSubjectOptions([])
-      }
-    }
-    loadSubjects()
-  }, [])
-
-  // Subjects are now stored directly in class data, no need for separate fetching
-
   // Fetch completed batches
   useEffect(() => {
     const fetchBatches = async () => {
@@ -410,13 +391,6 @@ const Classes = () => {
     
     return numA - numB
   })
-
-  // Backend-ready functions
-  const generateClassName = (level: string, grade: string, subdivision?: string): string => {
-    const baseName = `${level} ${grade}`
-    return subdivision ? `${baseName}${subdivision}` : baseName
-  }
-
 
   const handleCreateClass = async (formData: ClassFormData) => {
     setIsCreatingClass(true)
@@ -534,35 +508,6 @@ const Classes = () => {
     }
   }
 
-  const handleUpdateClass = async (id: string, formData: ClassFormData) => {
-    try {
-      // Find the selected teacher
-      const selectedTeacher = teachers.find(teacher => teacher.id === formData.classTeacherId)
-      
-      // Backend API call would go here
-      // const response = await fetch(`/api/classes/${id}`, {
-      //   method: 'PUT',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(formData)
-      // })
-
-      setClasses(prev => prev.map(cls => 
-        cls.id === id 
-          ? { 
-              ...cls, 
-              ...formData,
-              classTeacher: selectedTeacher || null,
-              name: generateClassName(formData.level, formData.grade, formData.subdivision),
-              updatedAt: new Date().toISOString()
-            }
-          : cls
-      ))
-    } catch (error) {
-      console.error('Error updating class:', error)
-    }
-  }
-
-
   const getLevelColor = (level: string) => {
     switch (level) {
       case 'Primary': return 'bg-blue-100 text-blue-800'
@@ -571,48 +516,9 @@ const Classes = () => {
     }
   }
 
-  // Derive level from grade selection (for new class creation)
-  const deriveLevelFromGrade = (grade: string): 'Early Childhood' | 'Primary' | 'Junior High' => {
-    if (!grade) return 'Primary'
-    if (grade.startsWith('Primary')) return 'Primary'
-    if (grade.startsWith('JHS')) return 'Junior High'
-    return 'Early Childhood'
-  }
-
-  const toggleSubjectSelection = (name: string) => {
-    setAddForm(prev => {
-      const exists = prev.subjects.includes(name)
-      return {
-        ...prev,
-        subjects: exists ? prev.subjects.filter(s => s !== name) : [...prev.subjects, name]
-      }
-    })
-  }
-
-  const onSaveAddClass = async () => {
-    try {
-      const level: 'Early Childhood' | 'Primary' | 'Junior High' = deriveLevelFromGrade(addForm.grade)
-      const formData: ClassFormData = {
-        level,
-        grade: addForm.grade,
-        subdivision: addForm.subdivision || undefined,
-        classTeacherId: addForm.classTeacherId || '',
-        room: addForm.room || 'TBA',
-        maxStudents: Number(addForm.maxStudents) || 30,
-        academicYear: addForm.academicYear || '2024-2025',
-        subjects: addForm.subjects || []
-      }
-      await handleCreateClass(formData)
-    } catch (e) {
-      console.error('Error saving new class:', e)
-    }
-  }
-
   const primaryClasses = classes.filter(cls => cls.level === 'Primary')
   const jhsClasses = classes.filter(cls => cls.level === 'Junior High')
-  const earlyChildhoodClasses = classes.filter(cls => cls.level === 'Early Childhood')
   const totalStudents = classes.reduce((sum, cls) => sum + cls.studentCount, 0)
-  const averageClassSize = Math.round(totalStudents / classes.length)
 
   const handleViewMembers = async (cls: Class) => {
     setSelectedClass(cls)

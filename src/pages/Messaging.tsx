@@ -45,7 +45,7 @@ const sortClassesAscending = (classes: any[]) => {
 
 const Messaging = () => {
   const { isTeacher } = useAuth()
-  const { smsPoints, loading: smsPointsLoading, deductPoints, purchasePoints } = useSMSPoints()
+  const { smsPoints, loading: smsPointsLoading, deductPoints } = useSMSPoints()
   const { pricing, calculateCost } = useSMSPricing()
   
   const [showParentsModal, setShowParentsModal] = useState(false)
@@ -255,16 +255,8 @@ const Messaging = () => {
     setModalStep(3)
   }
 
-  const handleBackFromRecipients = () => {
-    setModalStep(1)
-  }
-
   const handleNextFromRecipients = () => {
     setModalStep(4)
-  }
-
-  const handleBackFromPreview = () => {
-    setModalStep(2)
   }
 
 

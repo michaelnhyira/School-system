@@ -104,7 +104,7 @@ export const testPeriodSpecificData = async () => {
     );
     console.log(`📋 Payment history for ${period1.academicYear} - ${period1.term}:`);
     console.log(`  - Number of payments: ${history1.length}`);
-    history1.forEach((payment, index) => {
+    history1.forEach((payment: any, index: number) => {
       console.log(`    ${index + 1}. ₵${payment.amount} via ${payment.paymentMethod}`);
     });
 
@@ -116,7 +116,7 @@ export const testPeriodSpecificData = async () => {
     );
     console.log(`📋 Payment history for ${period2.academicYear} - ${period2.term}:`);
     console.log(`  - Number of payments: ${history2.length}`);
-    history2.forEach((payment, index) => {
+    history2.forEach((payment: any, index: number) => {
       console.log(`    ${index + 1}. ₵${payment.amount} via ${payment.paymentMethod}`);
     });
     console.log('');

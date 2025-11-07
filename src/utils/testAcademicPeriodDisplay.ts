@@ -1,5 +1,3 @@
-import { useAcademicPeriod } from '../contexts/AcademicPeriodContext';
-
 /**
  * Test function to verify academic period display works correctly
  */

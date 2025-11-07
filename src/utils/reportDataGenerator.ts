@@ -43,7 +43,7 @@ export const calculateGrade = (totalScore: number): string => {
 
 // Generate sample report data
 export const generateSampleReportData = (student: Student): ReportCardData => {
-  const grades: Grade[] = ghanaianSubjects.map((subject, index) => {
+  const grades: Grade[] = ghanaianSubjects.map((subject) => {
     // Generate realistic scores
     const sbaScore = Math.floor(Math.random() * 20) + 30; // 30-50
     const examScore = Math.floor(Math.random() * 20) + 30; // 30-50

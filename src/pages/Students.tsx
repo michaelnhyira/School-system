@@ -41,7 +41,7 @@ const sortClassesAscending = (classes: any[]) => {
 }
 
 const Students = () => {
-  const { userRole, isTeacher } = useAuth()
+  const { isTeacher } = useAuth()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedFilters, setSelectedFilters] = useState<string[]>([])
   const [classFilter, setClassFilter] = useState('all')
@@ -57,6 +57,7 @@ const Students = () => {
     dob: '',
     gender: '',
     birthPlace: '',
+    nationality: '',
     religion: '',
     address: '',
     prevSchool: '',
@@ -79,6 +80,7 @@ const Students = () => {
     dob: '',
     gender: '',
     birthPlace: '',
+    nationality: 'Ghanaian',
     religion: '',
     address: '',
     prevSchool: '',
@@ -155,6 +157,7 @@ const Students = () => {
           dob: student.dob || '',
           gender: student.gender || '',
           birthPlace: student.birthPlace || '',
+          nationality: student.nationality || 'Ghanaian',
           religion: student.religion || '',
           prevSchool: student.prevSchool || '',
           lastClass: student.lastClass || '',
@@ -277,6 +280,7 @@ const Students = () => {
       dob: student.dob || '',
       gender: student.gender || '',
       birthPlace: student.birthPlace || '',
+      nationality: student.nationality || 'Ghanaian',
       religion: student.religion || '',
       address: student.address || '',
       prevSchool: student.prevSchool || '',
@@ -438,6 +442,7 @@ const Students = () => {
         dob: formData.dob,
         gender: formData.gender,
         birthPlace: formData.birthPlace,
+        nationality: formData.nationality,
         religion: formData.religion,
         address: formData.address,
         prevSchool: formData.prevSchool,
@@ -482,6 +487,7 @@ const Students = () => {
         dob: formData.dob,
         gender: formData.gender,
         birthPlace: formData.birthPlace,
+        nationality: formData.nationality,
         religion: formData.religion,
         prevSchool: formData.prevSchool,
         lastClass: formData.lastClass,
@@ -537,25 +543,6 @@ const Students = () => {
     }
   }
 
-  const handleUpdateStudent = async (id: string, studentData: Partial<Student>) => {
-    try {
-      // Backend API call would go here
-      // const response = await fetch(`/api/students/${id}`, {
-      //   method: 'PUT',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(studentData)
-      // })
-
-      setStudents(prev => prev.map(student => 
-        student.id === id 
-          ? { ...student, ...studentData, updatedAt: new Date().toISOString() }
-          : student
-      ))
-    } catch (error) {
-      console.error('Error updating student:', error)
-    }
-  }
-
   // Handle updating student from edit form
   const handleUpdateStudentFromEdit = async () => {
     if (!selectedStudent) return
@@ -595,6 +582,7 @@ const Students = () => {
         dob: editFormData.dob,
         gender: editFormData.gender,
         birthPlace: editFormData.birthPlace,
+        nationality: editFormData.nationality,
         religion: editFormData.religion,
         address: editFormData.address,
         prevSchool: editFormData.prevSchool,
@@ -678,17 +666,6 @@ const Students = () => {
       alert('Failed to update student. Please try again.')
     } finally {
       setIsUpdating(false)
-    }
-  }
-
-  const handleDelete = async (id: string) => {
-    try {
-      // Backend API call would go here
-      // await fetch(`/api/students/${id}`, { method: 'DELETE' })
-
-      setStudents(students.filter(student => student.id !== id))
-    } catch (error) {
-      console.error('Error deleting student:', error)
     }
   }
 

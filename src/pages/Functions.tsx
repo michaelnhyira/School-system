@@ -67,7 +67,6 @@ const Functions = () => {
         
         // Use the actual class name and level from your database
         const className = (randomClass as any).name || 'Unknown Class'
-        const classLevel = (randomClass as any).level || 'Primary'
         
         // Generate admission number
         const admissionNumber = `ADM${new Date().getFullYear()}${String(i).padStart(3, '0')}`

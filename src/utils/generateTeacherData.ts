@@ -165,7 +165,7 @@ export const generateTeacherData = (): TeacherData[] => {
       contactNumber: phoneNumber,
       qualification,
       licenseNumber: `TL${new Date().getFullYear()}${staffCounter.toString().padStart(4, '0')}`,
-      specialization: subjects.join(', '),
+      specialization,
       previousExperience: `${experience} years teaching experience`,
       staffId: `STF${staffCounter.toString().padStart(4, '0')}`,
       appointmentDate,
