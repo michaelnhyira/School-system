@@ -37,6 +37,27 @@ class ArkaselAPI {
   }
 
   /**
+   * Fetch current Arkesel SMS balance
+   */
+  async getBalance(): Promise<number> {
+    const url = `${this.config.baseUrl}/sms/api?action=check-balance&api_key=${encodeURIComponent(this.config.apiKey)}&response=json`;
+    try {
+      const response = await fetch(url, { method: 'GET' });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const data = await response.json();
+      // Expected: { balance: number | string }
+      const raw = (data && (data.balance ?? data.BALANCE ?? data.points)) as number | string | undefined;
+      const balance = typeof raw === 'string' ? parseFloat(raw) : typeof raw === 'number' ? raw : 0;
+      return isNaN(balance) ? 0 : balance;
+    } catch (error) {
+      console.error('Arkasel getBalance Error:', error);
+      return 0;
+    }
+  }
+
+  /**
    * Send SMS message via Firebase Cloud Functions
    */
   async sendSMS(options: SendSMSOptions): Promise<ArkaselResponse> {
@@ -153,7 +174,7 @@ class ArkaselAPI {
 
 // Default configuration
 const defaultConfig: ArkaselConfig = {
-  apiKey: 'c0d1dWxjV1ZMSEVpamtlYUJJSU4',
+  apiKey: 'R3VKVG1NRlZ4Wk5HQnZkVHZ6ZVI',
   baseUrl: 'https://sms.arkesel.com',
   senderId: 'JOHNWILLIAM' // Example: St. John's School (max 11 characters)
 };
@@ -226,5 +247,12 @@ export const arkaselUtils = {
     const isValid = arkaselAPI.validatePhoneNumber(phoneNumber);
     const formatted = arkaselAPI.formatPhoneNumber(phoneNumber);
     return { isValid, formatted };
+  },
+
+  /**
+   * Get current Arkesel SMS balance (points)
+   */
+  async getBalance(): Promise<number> {
+    return await arkaselAPI.getBalance();
   }
 };

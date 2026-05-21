@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { doc, getDoc, setDoc, updateDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../config/firebase';
+import { arkaselUtils } from '../utils/arkaselUtils';
 
 interface SMSPointsData {
   totalPoints: number;
@@ -83,17 +84,48 @@ export const SMSPointsProvider: React.FC<SMSPointsProviderProps> = ({ children }
   // Listen to real-time updates
   useEffect(() => {
     const smsPointsRef = doc(db, 'system', 'smsPoints');
-    
-    const unsubscribe = onSnapshot(smsPointsRef, (doc) => {
-      if (doc.exists()) {
-        const data = doc.data() as SMSPointsData;
-        setSmsPoints(data);
-        setError(null);
-      } else {
-        // Initialize if document doesn't exist
-        initializeSMSPoints();
+
+    const unsubscribe = onSnapshot(smsPointsRef, async (doc) => {
+      try {
+        if (doc.exists()) {
+          const data = doc.data() as SMSPointsData;
+          // Always override remaining points with live Arkesel balance
+          const balance = await arkaselUtils.getBalance();
+          setSmsPoints({
+            ...data,
+            totalPoints: balance, // reflect live balance as total available
+            usedPoints: 0,
+            remainingPoints: balance,
+            lastUpdated: new Date().toISOString(),
+          });
+          setError(null);
+        } else {
+          // Initialize if document doesn't exist
+          await initializeSMSPoints();
+          const balance = await arkaselUtils.getBalance();
+          setSmsPoints(prev => ({
+            ...(prev || {
+              totalPoints: 0,
+              usedPoints: 0,
+              remainingPoints: 0,
+              lastUpdated: new Date().toISOString(),
+              allocatedBy: 'system',
+              allocationDate: new Date().toISOString(),
+              totalPurchased: 0,
+              totalSpent: 0
+            }),
+            totalPoints: balance,
+            usedPoints: 0,
+            remainingPoints: balance,
+            lastUpdated: new Date().toISOString(),
+          }));
+        }
+      } catch (err) {
+        console.error('Error syncing SMS points from Arkesel:', err);
+        setError('Failed to sync SMS points');
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }, (err) => {
       console.error('Error listening to SMS points:', err);
       setError('Failed to load SMS points');
@@ -103,27 +135,22 @@ export const SMSPointsProvider: React.FC<SMSPointsProviderProps> = ({ children }
     return () => unsubscribe();
   }, []);
 
-  // Deduct points when sending SMS
+  // Deduct points when sending SMS (use Arkesel live balance)
   const deductPoints = async (points: number): Promise<boolean> => {
     if (!smsPoints || smsPoints.remainingPoints < points) {
       return false;
     }
 
     try {
-      const smsPointsRef = doc(db, 'system', 'smsPoints');
-      const newUsedPoints = smsPoints.usedPoints + points;
-      const newRemainingPoints = smsPoints.totalPoints - newUsedPoints;
-      
-      await updateDoc(smsPointsRef, {
-        usedPoints: newUsedPoints,
-        remainingPoints: newRemainingPoints,
-        lastUpdated: new Date().toISOString()
-      });
-      
+      // We don't actually deduct locally; Arkesel balance changes when SMS are sent
+      // Optimistically reduce remainingPoints for instant UI feedback
+      setSmsPoints(prev => prev ? { ...prev, remainingPoints: prev.remainingPoints - points } : prev);
+      // Then refresh from Arkesel to reflect true balance
+      await refreshPoints();
       return true;
     } catch (err) {
-      console.error('Error deducting SMS points:', err);
-      setError('Failed to deduct SMS points');
+      console.error('Error deducting SMS points (sync):', err);
+      setError('Failed to sync SMS points after send');
       return false;
     }
   };
@@ -198,20 +225,30 @@ export const SMSPointsProvider: React.FC<SMSPointsProviderProps> = ({ children }
     }
   };
 
-  // Refresh points manually
+  // Refresh points manually (always pull from Arkesel)
   const refreshPoints = async (): Promise<void> => {
     setLoading(true);
     try {
-      const smsPointsRef = doc(db, 'system', 'smsPoints');
-      const smsPointsSnap = await getDoc(smsPointsRef);
-      
-      if (smsPointsSnap.exists()) {
-        const data = smsPointsSnap.data() as SMSPointsData;
-        setSmsPoints(data);
-        setError(null);
-      }
+      const balance = await arkaselUtils.getBalance();
+      setSmsPoints(prev => prev ? {
+        ...prev,
+        totalPoints: balance,
+        usedPoints: 0,
+        remainingPoints: balance,
+        lastUpdated: new Date().toISOString(),
+      } : {
+        totalPoints: balance,
+        usedPoints: 0,
+        remainingPoints: balance,
+        lastUpdated: new Date().toISOString(),
+        allocatedBy: 'system',
+        allocationDate: new Date().toISOString(),
+        totalPurchased: 0,
+        totalSpent: 0
+      });
+      setError(null);
     } catch (err) {
-      console.error('Error refreshing SMS points:', err);
+      console.error('Error refreshing SMS points from Arkesel:', err);
       setError('Failed to refresh SMS points');
     } finally {
       setLoading(false);
